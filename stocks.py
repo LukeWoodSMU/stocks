@@ -2,6 +2,11 @@ import requests
 from requests.auth import HTTPDigestAuth
 import json
 from collections import OrderedDict
+import sys
+
+def analyzeResponse():
+    print("The response contains {0} properties".format(len(jData)))
+    print("\n")
 
 def getMetaDataString():
      #This is to get the meta data before parsing the rest of the data
@@ -38,10 +43,19 @@ def getMinuteDataString(periods):
             string += "\n"
     return string
 
+def getTicker():
+    return jData['Meta Data']["2. Symbol"]
 
+def getMostRecent():
+    return getMinuteDataString(1)
+
+if len(sys.argv) == 1:
+    print "Please enter a Ticker: "
+    symbol = raw_input().upper()
+else:
+    symbol = sys.argv[1].upper() 
 # Add into API call
 funtion = "TIME_SERIES_INTRADAY"
-symbol = "TSLA"
 interval = "1min"
 apikey = "7854"
 #How many Minutes?
@@ -50,20 +64,21 @@ periods = 10
 
 url = "http://www.alphavantage.co/query?function=" + funtion + "&symbol=" + symbol + "&interval=" + interval + "&apikey=" + apikey
 myResponse = requests.get(url)
-# For successful API call, response code will be 200 (OK)
+
 if(myResponse.ok):
 
-    # Loading the response data into a dict variable
-    # json.loads takes in only binary or string variables so using content to fetch binary content
-    # Loads (Load String) takes a Json file and converts into python data structure (dict or list, depending on JSON)
+   
     jData = json.loads(myResponse.content, object_pairs_hook=OrderedDict)
-
-    print("The response contains {0} properties".format(len(jData)))
-    print("\n")
-
-    print getMetaDataString()
-    print getMinuteDataString(periods)
-            
+    
+    try:
+        print getTicker()
+        print getMostRecent()
+    except:
+        print "Please Enter Valid Information"          
+    
+    #print getMetaDataString()
+    #print getMinuteDataString(periods)
+      
 
 else:
   # If response code is not ok (200), print the resulting http error code with description
