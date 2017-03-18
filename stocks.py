@@ -4,6 +4,10 @@ import json
 from collections import OrderedDict
 import sys
 
+
+import plotly.plotly as py
+import plotly.graph_objs as go
+
 def analyzeResponse():
     print("The response contains {0} properties".format(len(jData)))
     print("\n")
@@ -44,42 +48,68 @@ def getMinuteDataString(periods):
     return string
 
 def getTicker():
-    return jData['Meta Data']["2. Symbol"]
+    return symbol
 
 def getMostRecent():
     return getMinuteDataString(1)
 
-if len(sys.argv) == 1:
-    print "Please enter a Ticker: "
-    symbol = raw_input().upper()
-else:
-    symbol = sys.argv[1].upper() 
-# Add into API call
-funtion = "TIME_SERIES_INTRADAY"
-interval = "1min"
-apikey = "7854"
-#How many Minutes?
-periods = 10
-
-
-url = "http://www.alphavantage.co/query?function=" + funtion + "&symbol=" + symbol + "&interval=" + interval + "&apikey=" + apikey
-myResponse = requests.get(url)
-
-if(myResponse.ok):
-
-   
+def makeAPICall():
+    url = "http://www.alphavantage.co/query?function=" + function + "&symbol=" + symbol + "&interval=" + interval + "&apikey=" + apikey + "&series_type=" + series_type + "&time_period=" + time_period
+    myResponse = requests.get(url)
     jData = json.loads(myResponse.content, object_pairs_hook=OrderedDict)
-    
-    try:
-        print getTicker()
-        print getMostRecent()
-    except:
-        print "Please Enter Valid Information"          
-    
-    #print getMetaDataString()
-    #print getMinuteDataString(periods)
-      
+    return (myResponse, jData)
 
-else:
-  # If response code is not ok (200), print the resulting http error code with description
-    myResponse.raise_for_status()
+def checkFunction(input):
+    for id in functions:
+        if input == id:
+            return True
+    return False
+
+
+functions = {1 : "EMA", 2 : "TIME_SERIES_INTRADAY"}   
+
+running = True 
+while running:
+    try:
+        print
+        # Add into API call
+        print "Availible Functions: " 
+        print "    ", functions
+        print "Enter Function Number: ", 
+        function = input()
+        if checkFunction:
+            function = functions[function]
+        else:
+            raise ValueError('Incorrect Function ID')
+
+        if len(sys.argv) == 1:
+            print "Enter Ticker: ", 
+            symbol = raw_input()
+        else:
+            symbol = sys.argv[1].upper() 
+        interval = "1min"
+        apikey = "7854"
+        series_type = "close"
+        time_period = "60"
+        #How many Minutes?
+        periods = 10
+
+
+        (myResponse, jData) = makeAPICall()
+        print
+
+        if (myResponse.ok):
+            print getTicker()
+            print getMostRecent()
+        else:
+            # If response code is not ok (200), print the resulting http error code with description
+            myResponse.raise_for_status()
+            raise ValueError('Bad Server Response')
+
+        running = False
+    except:
+        print "Please Enter Valid Information" 
+        running = False       
+    
+#print getMetaDataString()
+#print getMinuteDataString(periods)
