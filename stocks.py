@@ -77,7 +77,7 @@ def graphValues(valType, mins):
                 try: 
                     subsubData = OrderedDict((subData[j])) 
                     for k in subsubData: #this is to get the data from each indiviudal minute
-                        if valType in k:
+                        if valType.upper() in k.upper():
                             values.append((subsubData[k]))
                     count += 1
                     counter.append(count)
@@ -145,7 +145,7 @@ while running:
         print "Please Enter Valid Information" 
         running = False       
 #print getMetaDataString()
-print "Graph Value: ", 
+print "Graph Value: (EMA, open, etc...", 
 inp = raw_input()
 graphValues(inp, periods)
 #graphValues("close", periods)
