@@ -56,7 +56,7 @@ def makeAPICall():
     url = "http://www.alphavantage.co/query?function=" + function + "&symbol=" + symbol + "&interval=" + interval + "&apikey=" + apikey + "&series_type=" + series_type + "&time_period=" + time_period
     myResponse = requests.get(url)
     jData = json.loads(myResponse.content, object_pairs_hook=OrderedDict)
-    return (myResponse, jData)
+    return (url, myResponse, jData)
 
 def checkFunction(input):
     for id in functions:
@@ -91,8 +91,8 @@ def graphValues(valType, mins):
     data = {}
     intvals = np.array(intvals)
     counter = np.array(counter)
-    plt.xticks(counter, time)
-    plt.xticks(rotation=90)
+    #plt.xticks(counter, time)
+    #plt.xticks(rotation=90)
     plt.plot(counter, intvals)
 
     
@@ -130,8 +130,7 @@ while running:
             raise ValueError('Period Must be Greater than 0')
 
 
-        (myResponse, jData) = makeAPICall()
-        print
+        (url, myResponse, jData) = makeAPICall()
 
         if (myResponse.ok):
             print getTicker()
@@ -153,3 +152,4 @@ graphValues(inp, periods)
 #graphValues("low", periods)
 #graphValues("high", periods)
 plt.show()
+#print url
