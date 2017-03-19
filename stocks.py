@@ -3,8 +3,8 @@ from requests.auth import HTTPDigestAuth
 import json
 from collections import OrderedDict
 import sys
-import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def analyzeResponse():
@@ -66,6 +66,7 @@ def checkFunction(input):
 
 def graphValues(valType, mins):
     count = 0
+    counter = []
     time = [] 
     values = []
     for i in jData: #this is to seperate minute data from metadata
@@ -76,23 +77,29 @@ def graphValues(valType, mins):
                 try: 
                     subsubData = OrderedDict((subData[j])) 
                     for k in subsubData: #this is to get the data from each indiviudal minute
-                        if k[3:] == valType:
+                        if valType in k:
                             values.append((subsubData[k]))
                     count += 1
+                    counter.append(count)
                     if count == mins:
                         break
                 except:
                     print
-    intvals = []                
-    for val in values:
+    intvals = []           
+    for val in reversed(values):
         intvals.append(float(val))
-    print intvals
     data = {}
-    plt.plot(intvals)
-    plt.show()
+    intvals = np.array(intvals)
+    counter = np.array(counter)
+    plt.xticks(counter, time)
+    plt.xticks(rotation=90)
+    plt.plot(counter, intvals)
 
+    
+   
+    # Make space for and rotate the x-axis tick labels  
 
-functions = {1 : "EMA", 2 : "TIME_SERIES_INTRADAY"}   
+functions = {1 : "EMA", 2 : "SMA", 4 : "TIME_SERIES_DAILY", 3 : "TIME_SERIES_INTRADAY", 5: "TIME_SERIES_MONTHLY" }   
 
 running = True 
 while running:
@@ -116,8 +123,11 @@ while running:
         apikey = "7854"
         series_type = "close"
         time_period = "60"
-        #How many Minutes?
-        periods = 10
+        #How many Periods?
+        print "Enter Amount of Periods: ", 
+        periods = input()
+        if periods <= 0:  
+            raise ValueError('Period Must be Greater than 0')
 
 
         (myResponse, jData) = makeAPICall()
@@ -136,5 +146,10 @@ while running:
         print "Please Enter Valid Information" 
         running = False       
 #print getMetaDataString()
-
-graphValues("open", 10)
+print "Graph Value: ", 
+inp = raw_input()
+graphValues(inp, periods)
+#graphValues("close", periods)
+#graphValues("low", periods)
+#graphValues("high", periods)
+plt.show()
